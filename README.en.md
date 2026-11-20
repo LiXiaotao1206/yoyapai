@@ -4,13 +4,13 @@ Fetch the latest free Clash subscription from [yoyapai.com](https://yoyapai.com/
 
 ## Stable subscription URL
 
-After making the repository public, use this URL in Clash:
+Gitee raw URL:
 
 ```text
 https://gitee.com/qingshan1206/yoyapai/raw/master/yoyapai.yaml
 ```
 
-Gitee redirects to `raw.giteeusercontent.com`, which Clash follows. Gitee caches raw files for 60–300 seconds. A current `yoyapai.yaml` is already committed; Gitee Go updates it daily.
+> Note: Gitee currently returns `451 Unavailable For Legal Reasons` (`The content may contain violation information`) for this YAML, so it cannot be used directly in Clash. Raw access to the `.py` and `.md` files works; only `yoyapai.yaml` is blocked by content moderation. Use object storage, a VPS, or GitHub instead.
 
 ## How it works
 

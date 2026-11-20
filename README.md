@@ -4,13 +4,13 @@
 
 ## 固定订阅地址
 
-仓库改为公开后，可以直接填入 Clash：
+Gitee raw 地址：
 
 ```text
 https://gitee.com/qingshan1206/yoyapai/raw/master/yoyapai.yaml
 ```
 
-Gitee 会重定向到 `raw.giteeusercontent.com`，Clash 会自动跟随；Gitee 对 raw 文件有 60–300 秒缓存。仓库中的 `yoyapai.yaml` 已提交一份最新数据，之后由 Gitee Go 每天自动更新。
+> 注意：Gitee 当前对该 YAML 返回 `451 Unavailable For Legal Reasons`（`The content may contain violation information`），因此这个 raw 地址暂时不能直接填入 Clash。仓库中的 `.py`、`.md` 文件 raw 访问正常，只有 `yoyapai.yaml` 被内容审核拦截。需要改用对象存储、VPS 或 GitHub 等托管方式。
 
 ## 工作流程
 

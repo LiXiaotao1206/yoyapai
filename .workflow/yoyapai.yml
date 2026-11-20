@@ -24,6 +24,7 @@ stages:
           - git config user.name "gitee-go"
           - git config user.email "gitee-go@noreply.gitee.com"
           - git add yoyapai.yaml
+          # 含 ": " 的命令必须整体加引号，否则会被 YAML 解析成对象。
           - 'git diff --cached --quiet || git commit -m "chore: update yoyapai.yaml [skip ci]"'
           - git config credential.helper store
           - printf 'https://oauth2:%s@gitee.com\n' "${YOYAPAI_TOKEN}" > ~/.git-credentials
