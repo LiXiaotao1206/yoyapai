@@ -2,6 +2,16 @@
 
 Fetch the latest free Clash subscription from [yoyapai.com](https://yoyapai.com/category/mianfeijiedian) and save it as `yoyapai.yaml`.
 
+## Stable subscription URL
+
+After making the repository public, use this URL in Clash:
+
+```text
+https://gitee.com/qingshan1206/yoyapai/raw/master/yoyapai.yaml
+```
+
+Gitee redirects to `raw.giteeusercontent.com`, which Clash follows. Gitee caches raw files for 60–300 seconds. A current `yoyapai.yaml` is already committed; Gitee Go updates it daily.
+
 ## How it works
 
 1. Fetch the category page `https://yoyapai.com/category/mianfeijiedian`.
@@ -45,25 +55,30 @@ The Gitee Go pipeline is currently set to 11:30. To run at 08:00 as originally p
 
 ### Gitee Go (cloud, recommended)
 
-The repository includes `.workflow/yoyapai.yml`: it runs daily at 11:30 Beijing time and uploads the result as a pipeline artifact.
+The repository includes `.workflow/yoyapai.yml`: it runs daily at 11:30 Beijing time and commits the latest `yoyapai.yaml` back to `master`, updating the stable URL above.
 
-1. Open the Gitee repository → Pipelines (Gitee Go) and enable it. Phone binding is required; each repository gets 200 free build minutes per month.
-2. If the `yoyapai-daily` pipeline is not created automatically, create one, paste the contents of `.workflow/yoyapai.yml`, and save it.
-3. Confirm the schedule is `0 30 11 * * ?`, then run it once manually to test.
-4. After a successful run, download the `yoyapai` artifact from the release records; it contains `dist/yoyapai.yaml`.
+1. Make the repository public: Manage → Basic information → make public. A private repository's raw URL cannot be fetched by Clash.
+2. Create a Gitee personal access token with `projects` (repository read/write) permission.
+3. In Gitee Go's global/general variables (or environment variables), add `YOYAPAI_TOKEN` with the token value and mark it secret/encrypted.
+4. Open the repository → Pipelines (Gitee Go) and enable it. Phone binding is required; each repository gets 200 free build minutes per month.
+5. If the `yoyapai-daily` pipeline is not created automatically, create one, paste the contents of `.workflow/yoyapai.yml`, and save it.
+6. Confirm the schedule is `0 30 11 * * ?`, then run it once manually. A successful run adds a `chore: update yoyapai.yaml` commit.
 
 Notes:
 
 - Gitee Go uses six-field cron: `second minute hour day month weekday`.
-- If build timestamps are eight hours off from Beijing time, change the hour to 3: `0 30 3 * * ?`.
-- For an 08:00 run with UTC build time, use `0 0 0 * * ?` (00:00 UTC = 08:00 Beijing).
-- Artifacts are not a stable subscription URL. For a stable `.../raw/.../yoyapai.yaml` URL, commit the file back with a personal access token.
+- If build timestamps are eight hours off from Beijing time, change the hour to 3: `0 30 3 * * ?`; for 08:00 use `0 0 0 * * ?`.
+- `YOYAPAI_TOKEN` belongs only in Gitee Go variables; do not commit it. The token only needs write access to this repository; revoke it immediately if leaked.
+- The YAML (including node credentials) becomes public when the repository is public; evaluate the risk.
+- Gitee may moderate proxy/VPN content. If the repository is restricted, the URL stops working, so keep a local or alternative backup.
 
 ### Local crontab
 
 ```cron
 30 11 * * * cd /path/to/yoyapai && .venv/bin/python yoyapai.py >> fetch.log 2>&1
 ```
+
+Local crontab only updates the local file; commit and push separately to update the Gitee URL, or use the Gitee Go setup above.
 
 ## Notes
 

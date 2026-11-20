@@ -2,6 +2,16 @@
 
 每天抓取 [优雅数字派](https://yoyapai.com/category/mianfeijiedian) 最新日期的免费 Clash 订阅，并保存为 `yoyapai.yaml`。
 
+## 固定订阅地址
+
+仓库改为公开后，可以直接填入 Clash：
+
+```text
+https://gitee.com/qingshan1206/yoyapai/raw/master/yoyapai.yaml
+```
+
+Gitee 会重定向到 `raw.giteeusercontent.com`，Clash 会自动跟随；Gitee 对 raw 文件有 60–300 秒缓存。仓库中的 `yoyapai.yaml` 已提交一份最新数据，之后由 Gitee Go 每天自动更新。
+
 ## 工作流程
 
 1. 请求分类页 `https://yoyapai.com/category/mianfeijiedian`；
@@ -56,27 +66,32 @@ python yoyapai.py -o /path/to/yoyapai.yaml
 
 ### Gitee Go（云端，推荐）
 
-仓库已包含 `.workflow/yoyapai.yml`，每天北京时间 11:30 执行，并把结果上传为流水线制品。
+仓库已包含 `.workflow/yoyapai.yml`，每天北京时间 11:30 执行，并自动把最新的 `yoyapai.yaml` 提交回 `master`，从而更新上面的固定地址。
 
 首次使用：
 
-1. 打开 Gitee 仓库 →「流水线」（Gitee Go），按提示开通。账号需绑定手机号；每个仓库每月有 200 分钟免费构建时长。
-2. 如果流水线列表里没有自动出现 `yoyapai-daily`，点击「新建流水线」→ 选择空模板/自定义，把 `.workflow/yoyapai.yml` 的内容粘贴进去并保存。
-3. 在流水线的「定时触发」中确认 cron 为 `0 30 11 * * ?`，然后点击「立即执行」测试。
-4. 构建成功后，在「发布记录」下载 `yoyapai` 制品，里面是 `dist/yoyapai.yaml`。
+1. 把仓库改为公开：仓库 →「管理」→「基本信息」→ 仓库公开/开源。私有仓库的 raw 地址无法被 Clash 直接拉取。
+2. 生成私人令牌：Gitee 头像 →「设置」→「安全设置」→「私人令牌」→ 生成新令牌，勾选 `projects`（仓库读写）权限，复制令牌。
+3. 在 Gitee Go 的「全局参数 / 通用变量 / 环境变量」中添加变量 `YOYAPAI_TOKEN`，值为刚复制的令牌，并勾选加密/私密（不同版本菜单名可能不同）。
+4. 打开仓库 →「流水线」（Gitee Go），按提示开通。账号需绑定手机号；每个仓库每月有 200 分钟免费构建时长。
+5. 如果流水线列表里没有自动出现 `yoyapai-daily`，点击「新建流水线」→ 选择空模板/自定义，把 `.workflow/yoyapai.yml` 的内容粘贴进去并保存。
+6. 在「定时触发」中确认 cron 为 `0 30 11 * * ?`，然后点击「立即执行」测试。成功后会新增一条 `chore: update yoyapai.yaml` 提交，raw 地址随即更新。
 
 说明：
 
 - Gitee Go 的 cron 为 6 段格式：`秒 分 时 日 月 周`。
-- 如果构建记录显示的时间与北京时间相差 8 小时，把 cron 的小时改为 3，即 `0 30 3 * * ?`。
-- 如果改成 8:00 且构建时间同样是 UTC，则用 `0 0 0 * * ?`（00:00 UTC = 08:00 北京时间）。
-- 制品不是固定的订阅 URL。如果需要 `https://gitee.com/qingshan1206/yoyapai/raw/.../yoyapai.yaml` 这样的固定地址，需要配置私人令牌把文件回写到仓库。
+- 如果构建记录显示的时间与北京时间相差 8 小时，把 cron 的小时改为 3，即 `0 30 3 * * ?`；8:00 对应 `0 0 0 * * ?`。
+- `YOYAPAI_TOKEN` 只放在 Gitee Go 变量里，不要写进仓库；令牌只需要该仓库的写权限，泄露后立即在 Gitee 设置中撤销。
+- 仓库公开后，`yoyapai.yaml` 里的节点信息也会公开，请自行评估风险。
+- Gitee 可能对代理/VPN 类内容进行审核；如果仓库被限制，固定地址会失效，建议保留本地或其他托管方式作为备份。
 
 ### 本机 crontab
 
 ```cron
 30 11 * * * cd /path/to/yoyapai && .venv/bin/python yoyapai.py >> fetch.log 2>&1
 ```
+
+本机 crontab 只更新本地文件；如果要更新 Gitee 上的固定地址，需要再执行 `git add/commit/push`，或直接使用上面的 Gitee Go 方案。
 
 ## 说明
 

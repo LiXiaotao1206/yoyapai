@@ -12,7 +12,7 @@ triggers:
 stages:
   - stage:
     name: fetch
-    displayName: 抓取订阅
+    displayName: 抓取并更新订阅
     steps:
       - step: build@python
         name: fetch_yoyapai
@@ -20,15 +20,13 @@ stages:
         pythonVersion: '3.9'
         commands:
           - python3 -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
-          - PYTHONIOENCODING=utf-8 python3 yoyapai.py -o dist/yoyapai.yaml
-        artifacts:
-          - name: YOYAPAI_YAML
-            path:
-              - ./dist
-      - step: publish@general_artifacts
-        name: publish_yoyapai
-        displayName: 上传制品
-        dependArtifact: YOYAPAI_YAML
-        artifactRepository: default
-        artifactName: yoyapai
-        dependsOn: fetch_yoyapai
+          - PYTHONIOENCODING=utf-8 python3 yoyapai.py -o yoyapai.yaml
+          - git config user.name "gitee-go"
+          - git config user.email "gitee-go@noreply.gitee.com"
+          - git add yoyapai.yaml
+          - git diff --cached --quiet || git commit -m "chore: update yoyapai.yaml [skip ci]"
+          - git config --global credential.helper store
+          - printf 'https://oauth2:%s@gitee.com\n' "$YOYAPAI_TOKEN" > ~/.git-credentials
+          - chmod 600 ~/.git-credentials
+          - git remote set-url origin https://gitee.com/qingshan1206/yoyapai.git
+          - git push origin HEAD:master
