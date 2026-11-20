@@ -1,0 +1,34 @@
+version: '1.0'
+name: yoyapai-daily
+displayName: 每日 Clash 订阅抓取
+
+triggers:
+  schedule:
+    # 每天 11:30（北京时间）。站点最近 9 天在 09:54–11:18 发布当天文章。
+    # 如果构建记录显示的是 UTC 时间，把小时改为 3，即 '0 30 3 * * ?'。
+    - cron: '0 30 11 * * ?'
+
+stages:
+  - stage:
+    name: fetch
+    displayName: 抓取订阅
+    steps:
+      - step: build@python
+        name: fetch_yoyapai
+        displayName: Python 构建
+        pythonVersion: '3.9'
+        commands:
+          - python3 -m pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+          - python3 -m pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
+          - PYTHONIOENCODING=utf-8 python3 yoyapai.py -o dist/yoyapai.yaml
+        artifacts:
+          - name: YOYAPAI_YAML
+            path:
+              - ./dist
+      - step: publish@general_artifacts
+        name: publish_yoyapai
+        displayName: 上传制品
+        dependArtifact: YOYAPAI_YAML
+        artifactRepository: default
+        artifactName: yoyapai
+        dependsOn: fetch_yoyapai

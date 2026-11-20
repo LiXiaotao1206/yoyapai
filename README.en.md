@@ -38,10 +38,27 @@ python yoyapai.py -o /path/to/yoyapai.yaml
 
 ## Schedule
 
-The site usually publishes in the morning. Example crontab entry (every day at 11:10):
+The site published its daily posts between 09:54 and 11:18 Beijing time over the last nine days, so schedule the job after 11:30. Running at 08:00 will usually fail because today's post is not published yet.
+
+### Gitee Go (cloud, recommended)
+
+The repository includes `.workflow/yoyapai.yml`: it runs daily at 11:30 Beijing time and uploads the result as a pipeline artifact.
+
+1. Open the Gitee repository → Pipelines (Gitee Go) and enable it. Phone binding is required; each repository gets 200 free build minutes per month.
+2. If the `yoyapai-daily` pipeline is not created automatically, create one, paste the contents of `.workflow/yoyapai.yml`, and save it.
+3. Confirm the schedule is `0 30 11 * * ?`, then run it once manually to test.
+4. After a successful run, download the `yoyapai` artifact from the release records; it contains `dist/yoyapai.yaml`.
+
+Notes:
+
+- Gitee Go uses six-field cron: `second minute hour day month weekday`.
+- If build timestamps are eight hours off from Beijing time, change the hour to 3: `0 30 3 * * ?`.
+- Artifacts are not a stable subscription URL. For a stable `.../raw/.../yoyapai.yaml` URL, commit the file back with a personal access token.
+
+### Local crontab
 
 ```cron
-10 11 * * * cd /path/to/yoyapai && .venv/bin/python yoyapai.py >> fetch.log 2>&1
+30 11 * * * cd /path/to/yoyapai && .venv/bin/python yoyapai.py >> fetch.log 2>&1
 ```
 
 ## Notes
