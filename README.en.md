@@ -1,15 +1,13 @@
 # yoyapai
 
-Fetch today's free Clash subscription from [yoyapai.com](https://yoyapai.com/category/mianfeijiedian) and save it as `yoyapai.yaml`.
+Fetch the latest free Clash subscription from [yoyapai.com](https://yoyapai.com/category/mianfeijiedian) and save it as `yoyapai.yaml`.
 
 ## How it works
 
 1. Fetch the category page `https://yoyapai.com/category/mianfeijiedian`.
-2. Find the post whose title contains today's date (for example, `11月20日`) and open its link, such as `https://yoyapai.com/839`.
+2. The page is sorted newest first; take the first post (its title contains the latest date, for example, `11月20日`). It does not have to be today.
 3. Extract the `.yaml` URL from the "Clash (Clash Meta/Mihomo)" subscription code block.
 4. Download the subscription and save it verbatim as `yoyapai.yaml` (UTF-8).
-
-"Today" is evaluated in the Asia/Shanghai time zone.
 
 ## Requirements
 
@@ -38,7 +36,12 @@ python yoyapai.py -o /path/to/yoyapai.yaml
 
 ## Schedule
 
-The site published its daily posts between 09:54 and 11:18 Beijing time over the last nine days, so schedule the job after 11:30. Running at 08:00 will usually fail because today's post is not published yet.
+The script does not depend on the current date; it always takes the newest post on the category page:
+
+- After 11:30 Beijing time, this is usually today's post (the site published between 09:54 and 11:18 over the last nine days).
+- At 08:00, it is the previous day's post if today's is not published yet; the job still succeeds.
+
+The Gitee Go pipeline is currently set to 11:30. To run at 08:00 as originally planned, change the cron to `0 0 8 * * ?`.
 
 ### Gitee Go (cloud, recommended)
 
@@ -53,6 +56,7 @@ Notes:
 
 - Gitee Go uses six-field cron: `second minute hour day month weekday`.
 - If build timestamps are eight hours off from Beijing time, change the hour to 3: `0 30 3 * * ?`.
+- For an 08:00 run with UTC build time, use `0 0 0 * * ?` (00:00 UTC = 08:00 Beijing).
 - Artifacts are not a stable subscription URL. For a stable `.../raw/.../yoyapai.yaml` URL, commit the file back with a personal access token.
 
 ### Local crontab
@@ -63,6 +67,6 @@ Notes:
 
 ## Notes
 
-- If today's post is not published yet, the script exits with status 1 and lists the latest posts. It will not overwrite an existing `yoyapai.yaml` with stale data.
+- If the category page cannot be parsed or contains no dated posts, the script exits with status 1 and will not overwrite an existing `yoyapai.yaml`.
 - The response is validated (not HTML, contains Clash config fields) before the output file is replaced atomically.
 - Free nodes come from unknown sources. Use them for testing only, and never sign in to banking, email, or other sensitive accounts through them.

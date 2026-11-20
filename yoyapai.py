@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""抓取 yoyapai.com 当天的免费 Clash 订阅并保存为 yoyapai.yaml。
+"""抓取 yoyapai.com 最新日期的免费 Clash 订阅并保存为 yoyapai.yaml。
 
 流程：
-1. 请求“免费节点分享”分类页，按标题中的“M月D日”找到当天的文章；
+1. 请求“免费节点分享”分类页，取列表中最新的文章（不要求是当天）；
 2. 请求文章页，定位 Clash 订阅代码块中的 .yaml 地址；
 3. 下载订阅内容，原子写入 yoyapai.yaml。
 """
@@ -16,7 +16,6 @@ import re
 import sys
 import tempfile
 from dataclasses import dataclass
-from datetime import date, datetime
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
@@ -96,13 +95,11 @@ def parse_posts(page_html: str) -> list[Post]:
     return posts
 
 
-def find_post_for_date(posts: list[Post], target: date) -> Post | None:
-    """找到标题日期与 target 的月、日一致的文章（列表按时间倒序）。"""
-    for post in posts:
-        for month, day in DATE_RE.findall(post.title):
-            if int(month) == target.month and int(day) == target.day:
-                return post
-    return None
+def latest_post(posts: list[Post]) -> Post:
+    """返回最新日期的文章；分类页按发布时间倒序，第一篇即最新。"""
+    if not posts:
+        raise CrawlError("未能从分类页解析出文章，页面结构可能已变化")
+    return posts[0]
 
 
 def is_yaml_url(url: str) -> bool:
@@ -224,19 +221,9 @@ def save_atomic(path: Path, data: bytes) -> None:
         raise
 
 
-def beijing_today() -> date:
-    """以北京时间判断“今天”；没有时区数据时退回本机时间。"""
-    try:
-        from zoneinfo import ZoneInfo
-
-        return datetime.now(ZoneInfo("Asia/Shanghai")).date()
-    except Exception:
-        return date.today()
-
-
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        description="抓取 yoyapai.com 当天的 Clash 免费订阅并保存为 YAML。"
+        description="抓取 yoyapai.com 最新日期的 Clash 免费订阅并保存为 YAML。"
     )
     parser.add_argument(
         "-o",
@@ -249,28 +236,17 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
-    today = beijing_today()
     output = Path(args.output)
     session = build_session()
 
-    print(f"日期：{today.isoformat()}（北京时间）")
     print(f"[1/3] 获取分类页：{CATEGORY_URL}")
 
     try:
         category_html = fetch_html(session, CATEGORY_URL)
         posts = parse_posts(category_html)
-        if not posts:
-            raise CrawlError("未能从分类页解析出文章，页面结构可能已变化")
+        post = latest_post(posts)
 
-        post = find_post_for_date(posts, today)
-        if post is None:
-            recent = "；".join(item.title for item in posts[:3])
-            raise CrawlError(
-                f"未找到 {today.month} 月 {today.day} 日的文章，今天可能还未更新。"
-                f"近期文章：{recent}"
-            )
-
-        print(f"[2/3] 今日文章：{post.title}")
+        print(f"[2/3] 最新文章：{post.title}")
         print(f"      链接：{post.url}")
 
         article_html = fetch_html(session, post.url, referer=CATEGORY_URL)
