@@ -1,0 +1,8 @@
+# Generated subscription data
+yoyapai.yaml
+
+# Local environment and caches
+.venv/
+__pycache__/
+*.py[cod]
+fetch.log

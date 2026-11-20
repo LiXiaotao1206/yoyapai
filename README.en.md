@@ -1,36 +1,51 @@
 # yoyapai
 
-#### Description
-{**When you're done, you can delete the content in this README and update the file with details for others getting started with your repository**}
+Fetch today's free Clash subscription from [yoyapai.com](https://yoyapai.com/category/mianfeijiedian) and save it as `yoyapai.yaml`.
 
-#### Software Architecture
-Software architecture description
+## How it works
 
-#### Installation
+1. Fetch the category page `https://yoyapai.com/category/mianfeijiedian`.
+2. Find the post whose title contains today's date (for example, `11月20日`) and open its link, such as `https://yoyapai.com/839`.
+3. Extract the `.yaml` URL from the "Clash (Clash Meta/Mihomo)" subscription code block.
+4. Download the subscription and save it verbatim as `yoyapai.yaml` (UTF-8).
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+"Today" is evaluated in the Asia/Shanghai time zone.
 
-#### Instructions
+## Requirements
 
-1.  xxxx
-2.  xxxx
-3.  xxxx
+- Python 3.9+
+- Network access to `yoyapai.com` and `freenode.yoyapai.com` (set `HTTPS_PROXY` if needed)
 
-#### Contribution
+## Setup
 
-1.  Fork the repository
-2.  Create Feat_xxx branch
-3.  Commit your code
-4.  Create Pull Request
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
 
+## Usage
 
-#### Gitee Feature
+```bash
+python yoyapai.py
+```
 
-1.  You can use Readme\_XXX.md to support different languages, such as Readme\_en.md, Readme\_zh.md
-2.  Gitee blog [blog.gitee.com](https://blog.gitee.com)
-3.  Explore open source project [https://gitee.com/explore](https://gitee.com/explore)
-4.  The most valuable open source project [GVP](https://gitee.com/gvp)
-5.  The manual of Gitee [https://gitee.com/help](https://gitee.com/help)
-6.  The most popular members  [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
+Custom output path:
+
+```bash
+python yoyapai.py -o /path/to/yoyapai.yaml
+```
+
+## Schedule
+
+The site usually publishes in the morning. Example crontab entry (every day at 11:10):
+
+```cron
+10 11 * * * cd /path/to/yoyapai && .venv/bin/python yoyapai.py >> fetch.log 2>&1
+```
+
+## Notes
+
+- If today's post is not published yet, the script exits with status 1 and lists the latest posts. It will not overwrite an existing `yoyapai.yaml` with stale data.
+- The response is validated (not HTML, contains Clash config fields) before the output file is replaced atomically.
+- Free nodes come from unknown sources. Use them for testing only, and never sign in to banking, email, or other sensitive accounts through them.
