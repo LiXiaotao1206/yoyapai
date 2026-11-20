@@ -4091,5 +4091,3 @@ rules:
   - RULE-SET,ChinaCompanyIp,🎯 全球直连
   - GEOIP,CN,🎯 全球直连
   - MATCH,🐟 漏网之鱼
-
-# workflow push test
