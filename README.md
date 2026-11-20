@@ -4,7 +4,7 @@
 
 ## 固定订阅地址
 
-启用 GitHub Pages 后，可直接填入 Clash：
+GitHub Pages（已启用），可直接填入 Clash：
 
 ```text
 https://lixiaotao1206.github.io/yoyapai/yoyapai.yaml
@@ -15,8 +15,6 @@ GitHub raw（部分地区可能无法访问）：
 ```text
 https://raw.githubusercontent.com/LiXiaotao1206/yoyapai/master/yoyapai.yaml
 ```
-
-> Gitee raw 对 `yoyapai.yaml` 返回 451（内容审核），已不再使用。
 
 ## 工作流程
 
@@ -70,6 +68,5 @@ python yoyapai.py -o /path/to/yoyapai.yaml
 - 公开仓库连续 60 天无活动，定时工作流会被暂停；每天提交通常会保持活跃。
 - Pages 在每次提交后自动重建，通常有 1–2 分钟延迟。
 - 如果 GitHub Pages/raw 在国内不可用，建议改用阿里云 OSS / 腾讯云 COS 托管。
-- Gitee 的 `.workflow/yoyapai.yml` 不参与 GitHub Actions；如果 Gitee Go 流水线还开着，建议停用，避免两个仓库分叉。
 - 仓库和 `yoyapai.yaml` 是公开的，节点信息会公开，请自行评估风险。
 - 免费节点来源不明，仅供学习与测试，请勿用于登录网银、邮箱等重要账号。

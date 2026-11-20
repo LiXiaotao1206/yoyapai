@@ -4,7 +4,7 @@ Fetch the latest free Clash subscription from [yoyapai.com](https://yoyapai.com/
 
 ## Stable subscription URL
 
-After enabling GitHub Pages:
+GitHub Pages (enabled):
 
 ```text
 https://lixiaotao1206.github.io/yoyapai/yoyapai.yaml
@@ -15,8 +15,6 @@ GitHub raw (may be blocked in some regions):
 ```text
 https://raw.githubusercontent.com/LiXiaotao1206/yoyapai/master/yoyapai.yaml
 ```
-
-> Gitee raw returns 451 for this file and is no longer used.
 
 ## How it works
 
@@ -57,6 +55,5 @@ Notes:
 - In public repositories, scheduled workflows are disabled after 60 days without repository activity; the daily commit usually keeps it active.
 - Pages rebuilds after each commit, with a 1–2 minute delay.
 - If GitHub Pages/raw is unavailable in your region, use Aliyun OSS or Tencent COS.
-- The Gitee `.workflow/yoyapai.yml` does not run on GitHub Actions. Disable the Gitee Go pipeline to avoid divergence.
 - The repository and `yoyapai.yaml` are public; node information is exposed.
 - Free nodes come from unknown sources. Use them for testing only, and never sign in to banking, email, or other sensitive accounts through them.
