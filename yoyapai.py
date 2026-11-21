@@ -4,7 +4,8 @@
 流程：
 1. 请求“免费节点分享”分类页，取列表中最新的文章（不要求是当天）；
 2. 请求文章页，定位 Clash 订阅代码块中的 .yaml 地址；
-3. 下载订阅内容，原子写入 yoyapai.yaml。
+3. 从网页内容中解析最新订阅日期，写入 yoyapai.yaml 第一行；
+4. 下载订阅内容，原子写入 yoyapai.yaml。
 """
 
 from __future__ import annotations
@@ -16,6 +17,7 @@ import re
 import sys
 import tempfile
 from dataclasses import dataclass
+from datetime import date
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
@@ -47,6 +49,9 @@ PRE_RE = re.compile(r"<pre\b[^>]*>(.*?)</pre>", re.IGNORECASE | re.DOTALL)
 CODE_RE = re.compile(r"<code\b[^>]*>(.*?)</code>", re.IGNORECASE | re.DOTALL)
 TAG_RE = re.compile(r"<[^>]*>")
 DATE_RE = re.compile(r"(\d{1,2})\s*月\s*(\d{1,2})\s*日")
+YEAR_RE = re.compile(r"(20\d{2})")
+SUBSCRIPTION_DATE_RE = re.compile(r"/(20\d{2})/(\d{1,2})/(\d{1,2})-")
+PUBLISHED_RE = re.compile(r'"datePublished"\s*:\s*"(\d{4}-\d{2}-\d{2})')
 URL_RE = re.compile(r"https?://[^\s\"'<>]+", re.IGNORECASE)
 WHITESPACE_RE = re.compile(r"\s+")
 
@@ -139,6 +144,51 @@ def extract_clash_subscription_url(page_html: str) -> str:
         return yaml_urls[0]
 
     raise CrawlError("文章页中未找到 Clash 订阅地址（.yaml）")
+
+
+def extract_subscription_date(article_html: str, post: Post, subscription_url: str) -> date:
+    """从网页内容中提取最新订阅日期，不使用当前系统时间。"""
+    path_match = SUBSCRIPTION_DATE_RE.search(urlparse(subscription_url).path)
+    if path_match:
+        try:
+            return date(
+                int(path_match.group(1)),
+                int(path_match.group(2)),
+                int(path_match.group(3)),
+            )
+        except ValueError:
+            pass
+
+    published_match = PUBLISHED_RE.search(article_html)
+    if published_match:
+        try:
+            return date.fromisoformat(published_match.group(1))
+        except ValueError:
+            pass
+
+    date_match = DATE_RE.search(post.title)
+    year_match = YEAR_RE.search(post.title)
+    if date_match and year_match:
+        try:
+            return date(
+                int(year_match.group(1)),
+                int(date_match.group(1)),
+                int(date_match.group(2)),
+            )
+        except ValueError:
+            pass
+
+    raise CrawlError("无法从网页中确定最新订阅日期")
+
+
+def add_date_comment(data: bytes, published: date) -> bytes:
+    """在第一行写入网页中的最新订阅日期。"""
+    if data.startswith(b"\xef\xbb\xbf"):
+        data = data[3:]
+    header = f"# 最新订阅日期: {published.isoformat()}\n".encode("utf-8")
+    if data.startswith(header):
+        return data
+    return header + data
 
 
 def build_session() -> requests.Session:
@@ -251,11 +301,13 @@ def main(argv: list[str] | None = None) -> int:
 
         article_html = fetch_html(session, post.url, referer=CATEGORY_URL)
         subscription_url = extract_clash_subscription_url(article_html)
+        published = extract_subscription_date(article_html, post, subscription_url)
         print(f"      订阅：{subscription_url}")
+        print(f"      最新订阅日期：{published.isoformat()}")
 
         print("[3/3] 下载 Clash 订阅内容 ...")
         data = fetch_subscription(session, subscription_url, referer=post.url)
-        save_atomic(output, data)
+        save_atomic(output, add_date_comment(data, published))
     except CrawlError as exc:
         print(f"错误：{exc}", file=sys.stderr)
         return 1
@@ -263,7 +315,7 @@ def main(argv: list[str] | None = None) -> int:
         print("\n已取消。", file=sys.stderr)
         return 130
 
-    print(f"完成：{output.resolve()}（{len(data):,} 字节）")
+    print(f"完成：{output.resolve()}（{output.stat().st_size:,} 字节）")
     return 0
 
 

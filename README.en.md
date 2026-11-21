@@ -21,7 +21,17 @@ https://raw.githubusercontent.com/LiXiaotao1206/yoyapai/master/yoyapai.yaml
 1. Fetch the category page `https://yoyapai.com/category/mianfeijiedian`.
 2. The page is sorted newest first; take the first post (its title contains the latest date, for example, `11月20日`). It does not have to be today.
 3. Extract the `.yaml` URL from the "Clash (Clash Meta/Mihomo)" subscription code block.
-4. Download the subscription and save it verbatim as `yoyapai.yaml` (UTF-8).
+4. Extract the latest subscription date from the webpage, write it as the first line `# 最新订阅日期: YYYY-MM-DD`, and save the result as `yoyapai.yaml` (UTF-8).
+
+## Date comment
+
+The first line of the generated `yoyapai.yaml` looks like:
+
+```text
+# 最新订阅日期: 2026-11-21
+```
+
+The date comes from the latest subscription URL path, the article's `datePublished`, or the article title. It is **not** the system time when the script runs.
 
 ## Local usage
 
@@ -52,7 +62,7 @@ The repository includes `.github/workflows/yoyapai.yml`: it runs daily at 11:30 
 Notes:
 
 - GitHub Actions cron is UTC: `30 3 * * *` = 11:30 Beijing; use `0 0 * * *` for 08:00. The script always takes the newest post, so an 08:00 run usually gets the previous day's data.
-- In public repositories, scheduled workflows are disabled after 60 days without repository activity; the daily commit usually keeps it active.
+- In public repositories, scheduled workflows are disabled after 60 days without repository activity; the subscription date on the first line changes daily, so the workflow usually creates a commit every day and stays active.
 - Pages rebuilds after each commit, with a 1–2 minute delay.
 - If GitHub Pages/raw is unavailable in your region, use Aliyun OSS or Tencent COS.
 - The repository and `yoyapai.yaml` are public; node information is exposed.
