@@ -2,8 +2,8 @@ name: yoyapai-daily
 
 on:
   schedule:
-    # GitHub Actions 使用 UTC：03:30 UTC = 11:30 北京时间
-    - cron: '30 3 * * *'
+    # GitHub Actions 使用 UTC：20:00 UTC = 次日 4:00 北京时间
+    - cron: '0 20 * * *'
   workflow_dispatch:
 
 permissions:

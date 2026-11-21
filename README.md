@@ -64,7 +64,7 @@ python yoyapai.py -o /path/to/yoyapai.yaml
 
 ## GitHub Actions 定时更新
 
-仓库包含 `.github/workflows/yoyapai.yml`：每天北京时间 11:30 运行，抓取后自动提交 `yoyapai.yaml`。
+仓库包含 `.github/workflows/yoyapai.yml`：每天北京时间 4:00 运行，抓取后自动提交 `yoyapai.yaml`。
 
 首次使用：
 
@@ -75,7 +75,7 @@ python yoyapai.py -o /path/to/yoyapai.yaml
 
 说明：
 
-- GitHub Actions 的 cron 使用 UTC：`30 3 * * *` = 11:30 北京；要 8:00 改成 `0 0 * * *`。脚本总是取页面最新文章，所以 8:00 会拿到前一天的最新订阅。
+- GitHub Actions 的 cron 使用 UTC：`0 20 * * *` = 次日 4:00 北京时间。脚本总是取页面最新文章，所以 4:00 会拿到前一天（当天订阅尚未发布）的最新订阅。
 - 公开仓库连续 60 天无活动，定时工作流会被暂停；第一行的订阅日期每天变化，因此每天都会产生一次提交，通常能保持活跃。
 - Pages 在每次提交后自动重建，通常有 1–2 分钟延迟。
 - 如果 GitHub Pages/raw 在国内不可用，建议改用阿里云 OSS / 腾讯云 COS 托管。
