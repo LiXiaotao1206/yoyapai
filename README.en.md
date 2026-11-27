@@ -52,7 +52,7 @@ python yoyapai.py -o /path/to/yoyapai.yaml
 
 ## GitHub Actions
 
-The repository includes `.github/workflows/yoyapai.yml`: it runs daily at 12:00 Beijing time and commits `yoyapai.yaml`.
+The repository includes `.github/workflows/yoyapai.yml`: it is scheduled daily at 04:00 and 12:00 Beijing time and commits `yoyapai.yaml` only when the content changes.
 
 1. Settings → Actions → General → Workflow permissions → select "Read and write permissions".
 2. Actions → `yoyapai-daily` → Run workflow to test manually.
@@ -61,7 +61,7 @@ The repository includes `.github/workflows/yoyapai.yml`: it runs daily at 12:00 
 
 Notes:
 
-- GitHub Actions cron is UTC: `0 4 * * *` = 12:00 Beijing. The site usually publishes today's subscription by then (the last nine days were 09:54–11:18), so the run gets the day's data.
+- GitHub Actions cron uses UTC: `0 20 * * *` is 04:00 the next day in Beijing, and `0 4 * * *` is 12:00 the same day. If the site has not published today's subscription yet, the script fetches the latest available one. Scheduled runs may be delayed.
 - In public repositories, scheduled workflows are disabled after 60 days without repository activity; the subscription date on the first line changes daily, so the workflow usually creates a commit every day and stays active.
 - Pages rebuilds after each commit, with a 1–2 minute delay.
 - If GitHub Pages/raw is unavailable in your region, use Aliyun OSS or Tencent COS.
